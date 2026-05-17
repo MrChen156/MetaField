@@ -2,10 +2,10 @@
 
 **Physics-aware neural surrogates for high-fidelity ultra-fast simulation of nanophotonic sensors**
 
-**中文**  
+**中文**
 MetaField 是一个面向纳米光子传感器代理建模、逆向设计与计算基准测试的科研代码库。项目围绕统一的全场预测模型展开：训练阶段学习从 3D 几何与多层色散材料到电磁场响应的高保真映射；搜索阶段利用代理模型将遗传算法加速到高通量寻优场景；Benchmark 阶段评估模型在不同硬件下的吞吐量与延迟极限。
 
-**English**  
+**English**
 MetaField is a research-oriented codebase for surrogate modeling, inverse design, and benchmarking of nanophotonic sensors. The repository is centered on a shared full-field prediction model: training learns the mapping from 3D geometry and dispersive materials to electromagnetic responses; search uses the surrogate to accelerate high-throughput genetic optimization; benchmarking measures throughput and latency limits across hardware architectures.
 
 ---
@@ -21,7 +21,7 @@ MetaField is a research-oriented codebase for surrogate modeling, inverse design
 
 ## Installation | 安装
 
-**中文**  
+**中文**
 推荐使用 conda / mamba 创建独立环境：
 
 ```bash
@@ -31,7 +31,7 @@ conda activate metafield
 
 `environment.yaml` 默认从 PyPI 安装 `torch`，适合 CPU 与 Apple Silicon/MPS。若使用 NVIDIA CUDA，请根据服务器 CUDA 版本安装对应的 PyTorch wheel 或 conda package，然后再运行训练与 benchmark。
 
-**English**  
+**English**
 Use conda / mamba to create an isolated environment:
 
 ```bash
@@ -45,23 +45,23 @@ The default `environment.yaml` installs `torch` from PyPI, which is suitable for
 
 ## Dataset Setup | 数据集准备
 
-**中文**  
+**中文**
 本项目依赖外部仿真数据集。由于原始 H5 与转换后的 LMDB 文件体积较大，数据不随仓库分发，需要单独托管和下载。当前 `unified_v6p3_260209.h5` 版本包含 70,000 条 HDF5 样本，按 padding 后的空间尺寸组织为多个 `size_Z_X` group。
 
 推荐使用方式：
 
-1. 从外部数据发布页面下载数据包。  
+1. 从外部数据发布页面下载数据包。
    链接占位：`[dataset link pending]`
 2. 将数据解压到项目之外的独立存储目录，例如 `/path/to/data/unified_v6p3.h5`。
 3. 使用仓库内脚本从 H5 生成 split JSON，并转换为 LMDB。
 4. 在 `configs/train/metafield_ddp.yaml` 中修改 `data.lmdb_path` 和 `data.split_json`。
 
-**English**  
+**English**
 This project depends on an external simulation dataset. Because the original H5 files and the converted LMDB files are too large to ship with the repository, the dataset should be hosted and downloaded separately. The current `unified_v6p3_260209.h5` release contains 70,000 HDF5 samples organized into `size_Z_X` groups according to padded spatial resolution.
 
 Suggested workflow:
 
-1. Download the dataset archive from an external hosting page.  
+1. Download the dataset archive from an external hosting page.
    Placeholder: `[dataset link pending]`
 2. Extract it to a storage location outside the repository, for example `/path/to/data/unified_v6p3.h5`.
 3. Use the repository scripts to generate the split JSON and convert H5 to LMDB.
@@ -95,7 +95,7 @@ python3 -m scripts.data.convert_h5_to_lmdb \
 
 ## Dataset Record Description | 数据记录说明
 
-**中文**  
+**中文**
 MetaSPR-SimDB 是一个由 FDTD 全波电磁仿真生成的 HDF5 数据库，用于训练和评估纳米光子 MetaSPR 传感器的神经网络代理模型。每个样本包含：
 
 - `x`: 物理输入张量 `[epsilon_r, epsilon_i, k0x, k0z, SDF]`，其中 `epsilon_r = n^2 - k^2`，`epsilon_i = 2nk`，`k0x/k0z` 由线性扩展后的空间坐标与波矢相乘得到，`SDF` 是基于几何边界的非负归一化距离场。
@@ -107,7 +107,7 @@ MetaSPR-SimDB 是一个由 FDTD 全波电磁仿真生成的 HDF5 数据库，用
 
 预处理流程包括中心对齐 padding、横向周期 circular padding、纵向 replicate padding、坐标线性外推、复折射率到复介电常数转换、几何边界距离场生成、磁场阻抗缩放、source phase 条件项构造，以及按设计 ID 进行的光谱插值式 train/validation/test 划分。
 
-**English**  
+**English**
 MetaSPR-SimDB is an HDF5 full-wave electromagnetic simulation database generated from FDTD simulations of MetaSPR sensor structures. It is intended for training and evaluating neural surrogate models for nanophotonic sensors. Each sample contains:
 
 - `x`: physics-aware input tensor `[epsilon_r, epsilon_i, k0x, k0z, SDF]`, where `epsilon_r = n^2 - k^2`, `epsilon_i = 2nk`, `k0x/k0z` are built from linearly extended spatial coordinates multiplied by the free-space wavenumber, and `SDF` is a non-negative normalized distance-to-geometry-boundary field.
@@ -123,14 +123,14 @@ The preprocessing pipeline performs center-aligned padding, circular padding alo
 
 ## Checkpoints | 权重文件
 
-**中文**  
+**中文**
 仓库保留空的 `checkpoints/` 目录，但不提交大体积模型权重。训练会默认把权重写入该目录；GA 搜索配置默认读取 `checkpoints/best_model.pth`。运行搜索或需要预训练 surrogate 时，请先自行训练生成权重，或从外部发布页面下载 checkpoint 并放置为：
 
 ```text
 checkpoints/best_model.pth
 ```
 
-**English**  
+**English**
 The repository keeps an empty `checkpoints/` directory, but large model weights are not tracked by git. Training writes checkpoints there by default, and GA configs expect `checkpoints/best_model.pth`. Before running search or any pretrained-surrogate workflow, either train the model yourself or download the checkpoint from an external release page and place it at:
 
 ```text
@@ -161,7 +161,7 @@ MetaField/
 
 ## Core Data Interface | 核心数据与物理语义
 
-**中文**  
+**中文**
 训练和推理默认使用四类张量，直接对应底层物理信息：
 
 - `x`: 代理模型输入特征张量，形状通常为 `[B, 5, Z, X]`。包含介电常数实部 `epsilon_r`、虚部 `epsilon_i`、空间波矢项 `k0x`、`k0z`，以及非负几何边界距离场 `SDF`。
@@ -171,7 +171,7 @@ MetaField/
 
 LMDB 中每个样本记录上述字段；split JSON 则定义 train / val / test 中各个 `group` 对应的样本 index。
 
-**English**  
+**English**
 Training and inference use four tensor groups that map directly to the underlying physics:
 
 - `x`: surrogate input tensor, typically shaped as `[B, 5, Z, X]`, containing `epsilon_r`, `epsilon_i`, spatial wave-vector terms `k0x` and `k0z`, and the non-negative geometry-boundary distance field `SDF`.
@@ -185,10 +185,10 @@ Each LMDB record stores these fields, while the split JSON defines sample indice
 
 ## Configuration Scientific Semantics | 配置项科学解释
 
-**中文**  
+**中文**
 项目入口统一从 YAML 读取配置。不同工作流使用独立配置文件，从而避免训练、搜索、benchmark 与材料拟合参数混杂在单个脚本中。
 
-**English**  
+**English**
 All project entrypoints read from YAML configs. Each workflow keeps its own config so that training, search, benchmarking, and material fitting remain decoupled.
 
 ### 1. Training Config | 训练配置
@@ -301,7 +301,7 @@ python3 -m scripts.data.fit_material_drude_lorentz --config configs/materials/dr
 
 ## Development Notes | 开发说明
 
-**中文**  
+**中文**
 如果需要扩展模型、搜索后端或材料体系，建议优先沿用当前模块边界：
 
 - 新模型放入 `models/`
@@ -310,7 +310,7 @@ python3 -m scripts.data.fit_material_drude_lorentz --config configs/materials/dr
 - 新搜索后端放入 `search/`
 - 新 benchmark 放入 `benchmarks/`
 
-**English**  
+**English**
 When extending the project, keep the current module boundaries:
 
 - new models go to `models/`
