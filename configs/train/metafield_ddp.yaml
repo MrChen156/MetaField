@@ -1,0 +1,45 @@
+data:
+  lmdb_path: /home/data/five/unified_v6p3_260209.lmdb
+  split_json: /home/data/five/datasplit_v2_260209.json
+
+model:
+  in_channels: 5
+  out_channels: 6
+  cond_channels: 3
+  base_channels: 96
+  cond_embed_dim: 256
+  heads: 8
+  max_dist: 48
+  transformer_depth: 8
+
+train:
+  save_dir: checkpoints
+  pretrain_path: ""
+  epochs: 2000
+  batch_size: 36
+  grad_accum_steps: 4
+  lr: 0.0006
+  final_div_factor: 100.0
+  cache_clear_interval: 100
+  field_norm: 10.0
+  grad_weight: 0.0001
+  plot_interval: 20
+
+train_loader:
+  num_workers: 8
+  pin_memory: true
+  prefetch_factor: 2
+  persistent_workers: false
+
+val_loader:
+  num_workers: 2
+  pin_memory: true
+  prefetch_factor: 2
+  persistent_workers: false
+
+optimizer:
+  weight_decay: 0.0001
+
+scheduler:
+  pct_start: 0.05
+  div_factor: 25

@@ -1,0 +1,18 @@
+input_shape: [268, 160]
+batch_start: 2
+batch_limit: 4096
+warmup_iters: 3
+timed_iters: 20
+dtype: float32
+device: ""
+min_safety_gb: 4.0
+max_stall: 3
+fdtd_seconds: 150
+ga_population: 2048
+ga_generations: 2000
+output_path: results/benchmark/throughput.json
+base_channels: 96
+heads: 8
+max_dist: 48
+cond_embed_dim: 256
+transformer_depth: 8

@@ -1,0 +1,54 @@
+surrogate_checkpoint: checkpoints/best_model.pth
+materials_json: material_parameters/materials.json
+material_mapping_json: material_ri_mapping.json
+training_vectors_json: ""
+output_dir: /Users/chenmingqian/Desktop/LabProLiu/Projects/MetaField/GA_Results/ga_fixed_r100_hm400_p400_50slot_4layer_ti_oxide_bottom_au_top_100gen
+
+freq_range: [374.7405725, 749.481145]
+z_source_m: 5.8e-07
+field_norm: 10.0
+
+base_channels: 96
+heads: 8
+max_dist: 48
+cond_embed_dim: 256
+transformer_depth: 8
+
+population_size: 128
+generations: 100
+elite_count: 16
+tournament_size: 3
+crossover_rate: 0.85
+mutation_rate_geo: 0.4
+mutation_rate_mat: 0.3
+batch_size: 64
+seed_ratio: 0.0
+
+r_top_range: [100.0, 100.0]
+r_bot_range: [100.0, 100.0]
+height_range: [-400.0, -400.0]
+period_range: [400.0, 400.0]
+min_gap_nm: 12.0
+
+# Up to four contiguous material blocks. Unused slots are water/flow (code 0).
+min_block_cells: 3
+max_material_transitions: 3
+manifold_threshold: 3.0
+manifold_penalty_weight: 0.0
+
+# Material codes: Au=2, Ag=3, Ti=4, TiO2=6, Nb2O5=13.
+# Bottom layer is constrained to Ti/TiO2/Nb2O5; middle layers may include Ag/Au.
+allowed_materials: [2, 3, 4, 6, 13]
+adhesion_materials: [4, 6, 13]
+material_stack:
+  enabled: true
+  max_layers: 4
+  min_layer_cells: 3
+  max_total_cells: 50
+  bottom_material_choices: [4, 6, 13]
+  middle_material_choices: [2, 3, 4, 6, 13]
+  top_material: 2
+  allow_single_top_only: false
+
+devices: ["mps"]
+max_models: 1

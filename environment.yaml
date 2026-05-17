@@ -1,0 +1,19 @@
+name: metafield
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy>=2.0
+  - pyyaml
+  - lmdb
+  - matplotlib
+  - psutil
+  - scipy
+  - h5py
+  - tqdm
+  - pytest
+  - pip:
+      # CPU and Apple Silicon/MPS wheels install directly from PyPI.
+      # CUDA users may replace this with the PyTorch wheel matching their CUDA runtime.
+      - torch

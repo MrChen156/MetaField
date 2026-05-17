@@ -1,0 +1,10 @@
+torch
+numpy
+PyYAML
+lmdb
+matplotlib
+psutil
+scipy
+pytest
+h5py
+tqdm

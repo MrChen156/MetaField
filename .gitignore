@@ -1,0 +1,20 @@
+# Local one-off plotting and generated figures.
+local_plotting/
+
+# Python/runtime artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+
+# Large local datasets and generated result dumps should stay outside git.
+*.h5
+*.hdf5
+*.lmdb
+*.mdb
+checkpoints/*
+!checkpoints/.gitkeep
+GA_Results/
+
+# Editor-local state.
+.vscode/

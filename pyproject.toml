@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metafield"
+version = "0.1.0"
+description = "MetaField surrogate modeling, inverse design, and benchmarking toolkit"
+requires-python = ">=3.10"
+dependencies = [
+  "torch",
+  "numpy",
+  "PyYAML",
+  "lmdb",
+  "matplotlib",
+  "psutil",
+  "scipy",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,14 @@
+input_file: path/to/material.txt
+material_name: MoS2
+num_oscillators: 16
+k_weight: 8.0
+min_wavelength_nm: 300.0
+max_wavelength_nm: 1000.0
+input_wavelength_unit: um
+skiprows: 1
+default_refractive_index: 1.5
+materials_json: material_parameters/materials.json
+material_mapping_json: material_ri_mapping.json
+max_iterations: 3000
+ftol: 1.0e-9
+plot_output: ""
