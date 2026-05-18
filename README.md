@@ -335,14 +335,26 @@ python3 -m pytest tests -q
 - material fitting record update
 
 
-## 发布信息
+## Release Information | 发布信息
 
-华中科技大学刘钢教授课题组: http://faculty.hust.edu.cn/liugang5/zh_CN/index.htm
+**中文**
 
-本工作通讯作者胡文君副教授: http://faculty.hust.edu.cn/HUWENJUN/zh_CN/index.htm
+- 华中科技大学刘钢教授课题组: http://faculty.hust.edu.cn/liugang5/zh_CN/index.htm
+- 本工作通讯作者胡文君副教授: http://faculty.hust.edu.cn/HUWENJUN/zh_CN/index.htm
+- 联系方式: hu_wenjun【at】hust【dot】edu【dot】cn
+- 预训练权重与数据集下载信息即将发布。
 
-联系方式: hu_wenjun【at】hust【dot】edu【dot】cn
+**English**
+
+- Liu Gang Research Group, Huazhong University of Science and Technology: http://faculty.hust.edu.cn/liugang5/zh_CN/index.htm
+- Corresponding author: Associate Professor Wenjun Hu: http://faculty.hust.edu.cn/HUWENJUN/zh_CN/index.htm
+- Contact: hu_wenjun [at] hust [dot] edu [dot] cn
+- Pretrained weights and dataset download information will be released soon.
 
 ## Manuscript Draft | 论文草稿
 
-当前论文草稿见 [MetaField-Draft3.pdf](MetaField-Draft3.pdf)。
+**中文**  
+当前论文草稿见 [MetaField-Draft4.pdf](MetaField-Draft4.pdf)。
+
+**English**  
+The current manuscript draft is available at [MetaField-Draft4.pdf](MetaField-Draft4.pdf).
