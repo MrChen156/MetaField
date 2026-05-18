@@ -195,66 +195,159 @@ All project entrypoints read from YAML configs. Each workflow keeps its own conf
 
 文件: `configs/train/metafield_ddp.yaml`
 
-- `data.lmdb_path`: LMDB 数据集路径。
-- `data.split_json`: train / val split 文件路径。
-- `model.base_channels`, `model.heads`, `model.max_dist`, `model.cond_embed_dim`: MetaField 主体结构参数。
-- `train.save_dir`: checkpoint、history 和训练曲线输出目录。
-- `train.pretrain_path`: warm-start 权重路径；为空则从头训练。
-- `train.epochs`, `train.batch_size`, `train.grad_accum_steps`, `train.lr`: 训练主超参数。
-- `train.field_norm`: 电磁场归一化系数。由于局域热点区域可能出现极端场增强，该系数用于把目标场缩放到更稳定的优化区间。
-- `train.grad_weight`: gradient loss 权重，用于约束场空间梯度的一致性。
-- `train.cache_clear_interval`: 显存缓存清理周期。
-- `train_loader.*`, `val_loader.*`: DataLoader 并行参数。
-- `optimizer.*`, `scheduler.*`: 优化器与学习率调度设置。
+**中文**
+
+- `data.lmdb_path`: LMDB 数据集路径。训练代码从该目录读取已经转换好的 `x / y / cond / mask` 样本。
+- `data.split_json`: train / val / test 划分文件路径。该 JSON 记录每个 `size_Z_X` group 中哪些 index 属于不同 split。
+- `model.base_channels`: U-Net 主干的基础通道数，控制模型容量与显存消耗。
+- `model.heads`: bottleneck Transformer 中的 attention head 数量。
+- `model.max_dist`: 相对位置偏置的最大距离截断，用于限制全局 attention 中的相对空间距离表大小。
+- `model.cond_embed_dim`: 全局条件向量经过 Fourier feature 与 MLP 后的嵌入维度，FiLM 层使用该嵌入调制卷积特征。
+- `train.save_dir`: checkpoint、训练日志、history CSV 和训练曲线输出目录。
+- `train.pretrain_path`: warm-start 权重路径；为空时从随机初始化开始训练。
+- `train.epochs`, `train.batch_size`, `train.grad_accum_steps`, `train.lr`: 训练轮数、单卡 batch、梯度累积步数和初始学习率。
+- `train.field_norm`: 电磁场归一化系数。H5 中的 `y` 没有预先除以该值；训练 loss 中会用它缩放目标场，缓解局域场增强导致的数值尺度问题。
+- `train.grad_weight`: 空间梯度 loss 权重，用于鼓励预测场在边界和热点附近保持合理的空间变化。
+- `train.cache_clear_interval`: 显存缓存清理周期，主要用于长时间 DDP 训练的工程稳定性。
+- `train_loader.*`, `val_loader.*`: DataLoader 并行参数，例如 `num_workers`、`prefetch_factor` 和 `persistent_workers`。
+- `optimizer.*`, `scheduler.*`: 优化器和学习率调度参数。
+
+**English**
+
+- `data.lmdb_path`: Path to the converted LMDB dataset. Training reads preprocessed `x / y / cond / mask` samples from this directory.
+- `data.split_json`: Path to the train / validation / test split JSON. It records which sample indices in each `size_Z_X` group belong to each split.
+- `model.base_channels`: Base channel width of the U-Net backbone; it controls model capacity and memory usage.
+- `model.heads`: Number of attention heads in the bottleneck Transformer.
+- `model.max_dist`: Maximum relative-distance cutoff for the relative-position bias table used by global attention.
+- `model.cond_embed_dim`: Embedding dimension for the global condition vector after Fourier features and MLP projection; FiLM layers use this embedding to modulate convolutional features.
+- `train.save_dir`: Directory for checkpoints, logs, history CSV files, and training curves.
+- `train.pretrain_path`: Optional warm-start checkpoint path. If empty, training starts from random initialization.
+- `train.epochs`, `train.batch_size`, `train.grad_accum_steps`, `train.lr`: Main optimization parameters: epochs, per-device batch size, gradient accumulation, and learning rate.
+- `train.field_norm`: Field normalization factor. The H5 `y` tensor is not pre-divided by this value; the training loss applies it to stabilize the scale of electromagnetic fields with localized enhancement.
+- `train.grad_weight`: Weight of the spatial-gradient loss, used to regularize field variations near boundaries and hotspots.
+- `train.cache_clear_interval`: Interval for clearing device memory cache during long DDP training runs.
+- `train_loader.*`, `val_loader.*`: DataLoader parallelism settings such as `num_workers`, `prefetch_factor`, and `persistent_workers`.
+- `optimizer.*`, `scheduler.*`: Optimizer and learning-rate schedule parameters.
 
 ### 2. Search Config | 搜索配置
 
 文件: `configs/search/ga.yaml`
 
-- `surrogate_checkpoint`: GA 使用的 surrogate 模型权重。
-- `base_channels`, `heads`, `max_dist`, `cond_embed_dim`, `transformer_depth`: surrogate 模型结构参数，必须与训练权重匹配。
-- `population_size`, `generations`, `elite_count`: GA 主循环规模。
-- `tournament_size`, `crossover_rate`, `mutation_rate_geo`, `mutation_rate_mat`: GA 选择、杂交、突变参数。
-- `r_top_range`, `r_bot_range`, `height_range`, `period_range`: 几何变量搜索范围。
-- `min_gap_nm`, `min_block_cells`, `max_material_transitions`: 结构合法性与工艺约束。
-- `field_norm`: surrogate 输出反归一化系数。
-- `batch_size`: surrogate 批量评估大小。
-- `devices`: 指定推理设备；为空时自动选择。
+**中文**
+
+- `surrogate_checkpoint`: GA 调用的 MetaField surrogate 权重路径，默认期望 `checkpoints/best_model.pth`。
+- `base_channels`, `heads`, `max_dist`, `cond_embed_dim`, `transformer_depth`: surrogate 模型结构参数，必须与训练 checkpoint 完全匹配。
+- `population_size`, `generations`, `elite_count`: GA 种群大小、迭代代数和精英保留数量。
+- `tournament_size`: 锦标赛选择规模，影响选择压力。
+- `crossover_rate`: 几何和材料 genome 发生杂交的概率。
+- `mutation_rate_geo`: 几何与波长基因突变概率。
+- `mutation_rate_mat`: 材料堆叠基因突变概率。
+- `freq_range`: 搜索波段对应的频率/波矢参数范围。宽带搜索时，激发波长等效参与 genome 优化。
+- `r_top_range`, `r_bot_range`, `height_range`, `period_range`: 纳米结构几何变量搜索范围，单位为 nm。
+- `min_gap_nm`: 周期内相邻结构之间允许的最小间隙。
+- `min_block_cells`: 材料连续层的最小 slot 数，用于避免过薄的非物理材料层。
+- `max_material_transitions`: 材料交界面最大变化次数；例如 3 表示最多 4 个连续材料块。
+- `allowed_materials`, `adhesion_materials`, `material_stack.*`: 材料编码、底层约束、顶层约束、最大 active slots 和 flow padding 规则。
+- `field_norm`: surrogate 输出反归一化系数，应与训练配置保持一致。
+- `batch_size`: surrogate 批量评估大小，影响 GA fitness 计算吞吐。
+- `devices`: 指定推理设备；为空时自动选择 CUDA、MPS 或 CPU。
+
+**English**
+
+- `surrogate_checkpoint`: Path to the MetaField surrogate weights used by GA, typically `checkpoints/best_model.pth`.
+- `base_channels`, `heads`, `max_dist`, `cond_embed_dim`, `transformer_depth`: Surrogate architecture parameters. They must exactly match the training checkpoint.
+- `population_size`, `generations`, `elite_count`: Population size, number of GA generations, and number of elite individuals retained each generation.
+- `tournament_size`: Tournament selection size; larger values increase selection pressure.
+- `crossover_rate`: Probability of crossover for geometry and material genomes.
+- `mutation_rate_geo`: Mutation probability for geometry and wavelength genes.
+- `mutation_rate_mat`: Mutation probability for material-stack genes.
+- `freq_range`: Search range for the excitation frequency / wave-vector parameter. In broadband search, wavelength is optimized as part of the genome.
+- `r_top_range`, `r_bot_range`, `height_range`, `period_range`: Search ranges for nanostructure geometry variables in nm.
+- `min_gap_nm`: Minimum allowed in-period spacing between neighboring structures.
+- `min_block_cells`: Minimum number of contiguous slots per material layer, preventing unrealistically thin layers.
+- `max_material_transitions`: Maximum number of material-interface changes. For example, 3 allows at most 4 contiguous material blocks.
+- `allowed_materials`, `adhesion_materials`, `material_stack.*`: Material code set, bottom-layer constraints, top-layer constraints, maximum active slots, and flow-padding rules.
+- `field_norm`: Output de-normalization factor for surrogate predictions; it should match the training configuration.
+- `batch_size`: Batch size for surrogate fitness evaluation during GA.
+- `devices`: Explicit inference devices. If empty, CUDA, MPS, or CPU will be selected automatically.
 
 ### 3. Benchmark Config | 基准配置
 
 文件: `configs/bench/throughput.yaml`
 
-- `input_shape`: benchmark 输入的原始空间尺寸。
-- `batch_start`, `batch_limit`: batch doubling 的扫描范围。
-- `warmup_iters`, `timed_iters`: 预热轮数与计时轮数。
-- `device`, `dtype`: benchmark 使用的设备与数值精度。
-- `min_safety_gb`: 运行时保留的最小安全显存/内存阈值。
-- `max_stall`: 吞吐提升进入平台期时的提前停止阈值。
-- `fdtd_seconds`, `ga_population`, `ga_generations`: 用于生成 paper-style 速度对比摘要。
+**中文**
+
+- `input_shape`: benchmark 使用的输入空间尺寸，通常对应 H5/LMDB 中某个 padded group 的 `[Z, X]`。
+- `batch_start`, `batch_limit`: batch size 扫描范围；脚本通常按倍增方式寻找吞吐峰值。
+- `warmup_iters`: 预热迭代次数，用于排除首次 kernel 编译、缓存初始化等开销。
+- `timed_iters`: 正式计时迭代次数。
+- `device`: benchmark 设备，例如 `cuda`、`mps` 或 `cpu`。
+- `dtype`: 推理精度设置，例如 `float32`、`float16` 或 `bfloat16`，取决于硬件支持。
+- `min_safety_gb`: 运行时保留的安全显存/内存余量，避免 batch 扫描触发 OOM。
+- `max_stall`: 当吞吐提升进入平台期时提前停止 batch 扫描的阈值。
+- `fdtd_seconds`, `ga_population`, `ga_generations`: 用于估算 surrogate 相比传统 FDTD 和大规模 GA 搜索的 paper-style 加速比。
+
+**English**
+
+- `input_shape`: Spatial input size used by benchmark, usually matching the `[Z, X]` shape of a padded H5/LMDB group.
+- `batch_start`, `batch_limit`: Batch-size scan range. The benchmark typically doubles the batch size to find peak throughput.
+- `warmup_iters`: Warmup iterations used to exclude one-time kernel compilation and cache initialization overhead.
+- `timed_iters`: Timed iterations used for throughput measurement.
+- `device`: Benchmark device, such as `cuda`, `mps`, or `cpu`.
+- `dtype`: Inference precision, such as `float32`, `float16`, or `bfloat16`, depending on hardware support.
+- `min_safety_gb`: Reserved memory margin to avoid OOM during batch scanning.
+- `max_stall`: Early-stop threshold when throughput improvement reaches a plateau.
+- `fdtd_seconds`, `ga_population`, `ga_generations`: Parameters used to estimate paper-style speedup relative to conventional FDTD and large-scale GA search.
 
 ### 4. Material Fitting Config | 材料拟合配置
 
 文件: `configs/materials/drude_lorentz_fit.yaml`
 
-- `input_file`: 原始光学常数表路径。
-- `material_name`: 材料名称。
+**中文**
+
+- `input_file`: 原始光学常数表路径，通常包含波长、`n` 和 `k`。
+- `material_name`: 写入材料数据库的材料名称，需与后续材料编码保持一致。
 - `input_wavelength_unit`: 输入波长单位，当前支持 `um` 或 `nm`。
-- `skiprows`: 输入表头跳过行数。
-- `num_oscillators`: Lorentz 振子数量。
-- `k_weight`: 消光系数 `k` 项误差的加权因子。
-- `min_wavelength_nm`, `max_wavelength_nm`: 拟合波段。
-- `materials_json`: 拟合结果写入位置。
-- `material_mapping_json`: 材料名称与编码映射文件。
-- `default_refractive_index`: 新材料首次注册时在 mapping 中写入的默认 RI。
-- `plot_output`: 若非空，则输出拟合曲线图。
+- `skiprows`: 读取光学常数表时跳过的表头行数。
+- `num_oscillators`: Lorentz 振子数量。更多振子可以提升拟合自由度，但也可能过拟合。
+- `k_weight`: 消光系数 `k` 项误差权重，用于平衡 `n` 与 `k` 的拟合优先级。
+- `min_wavelength_nm`, `max_wavelength_nm`: 拟合使用的波长范围，应覆盖训练/搜索数据的目标波段。
+- `materials_json`: Drude-Lorentz 拟合参数写入位置。
+- `material_mapping_json`: 材料名称与整数编码映射文件。
+- `default_refractive_index`: 新材料首次注册时写入 mapping 的默认折射率占位值。
+- `plot_output`: 若非空，则输出拟合曲线图，用于检查拟合质量。
+
+**English**
+
+- `input_file`: Path to the raw optical-constant table, typically containing wavelength, `n`, and `k`.
+- `material_name`: Material name written to the material database. It should stay consistent with material encoding.
+- `input_wavelength_unit`: Wavelength unit of the input table; currently `um` and `nm` are supported.
+- `skiprows`: Number of header rows skipped when reading the optical-constant table.
+- `num_oscillators`: Number of Lorentz oscillators. More oscillators increase fitting flexibility but may overfit.
+- `k_weight`: Error weight for the extinction coefficient `k`, balancing the fitting priority between `n` and `k`.
+- `min_wavelength_nm`, `max_wavelength_nm`: Wavelength range used for fitting; it should cover the target training/search band.
+- `materials_json`: Output path for fitted Drude-Lorentz parameters.
+- `material_mapping_json`: Mapping file between material names and integer material codes.
+- `default_refractive_index`: Placeholder refractive index written to the mapping file when a new material is first registered.
+- `plot_output`: Optional output path for the fitting diagnostic plot.
 
 ### Configuration Rule of Thumb | 配置使用建议
+
+**中文**
 
 - 同一份 surrogate 权重对应的 `model.*` 参数，在 training、search 和 benchmark 中应保持一致。
 - 搜索配置中的 surrogate 参数若与训练配置不一致，通常会导致权重加载失败或行为错误。
 - benchmark 配置应聚焦输入规模、设备条件和测量策略，而不是训练目标或 GA 搜索目标。
 - 材料拟合配置应聚焦输入数据格式、拟合范围和输出落盘位置，而不是 surrogate 或 GA 参数。
+- 数据路径、checkpoint 路径和输出目录应使用本机绝对路径或清晰的项目相对路径，避免把个人存储路径硬编码进公开配置。
+
+**English**
+
+- The `model.*` parameters associated with the same surrogate checkpoint should remain consistent across training, search, and benchmark configs.
+- If surrogate parameters in search configs do not match the training config, checkpoint loading will usually fail or produce invalid behavior.
+- Benchmark configs should focus on input size, hardware settings, and measurement protocol rather than training objectives or GA targets.
+- Material-fitting configs should focus on input data format, fitting wavelength range, and output paths rather than surrogate or GA parameters.
+- Data paths, checkpoint paths, and output directories should use machine-local absolute paths or clear project-relative paths; avoid publishing private storage paths as defaults.
 
 ---
 
