@@ -435,14 +435,12 @@ python3 -m pytest tests -q
 - 华中科技大学刘钢教授课题组: http://faculty.hust.edu.cn/liugang5/zh_CN/index.htm
 - 本工作通讯作者胡文君副教授: http://faculty.hust.edu.cn/HUWENJUN/zh_CN/index.htm
 - 联系方式: hu_wenjun【at】hust【dot】edu【dot】cn
-- 预训练权重与数据集下载信息即将发布。
 
 **English**
 
 - Liu Gang Research Group, Huazhong University of Science and Technology: http://faculty.hust.edu.cn/liugang5/zh_CN/index.htm
 - Corresponding author: Associate Professor Wenjun Hu: http://faculty.hust.edu.cn/HUWENJUN/zh_CN/index.htm
 - Contact: hu_wenjun [at] hust [dot] edu [dot] cn
-- Pretrained weights and dataset download information will be released soon.
 
 ## Manuscript Draft | 论文草稿
 
