@@ -445,7 +445,7 @@ python3 -m pytest tests -q
 ## Manuscript Draft | 论文草稿
 
 **中文**
-当前论文草稿见 [MetaField-Draft4.pdf](MetaField-Draft4.pdf)。
+当前论文草稿见 [MetaField-Draft](MetaField-Draft5.pdf)。
 
 **English**
 The current manuscript draft is available at [MetaField-Draft](MetaField-Draft5.pdf).
