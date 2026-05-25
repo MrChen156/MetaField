@@ -446,8 +446,16 @@ python3 -m pytest tests -q
 
 ## Manuscript Draft | 论文草稿
 
-**中文**  
+**中文**
 当前论文草稿见 [MetaField-Draft4.pdf](MetaField-Draft4.pdf)。
 
-**English**  
-The current manuscript draft is available at [MetaField-Draft4.pdf](MetaField-Draft4.pdf).
+**English**
+The current manuscript draft is available at [MetaField-Draft](MetaField-Draft5.pdf).
+
+## Training Data | 训练数据集
+
+**中文**
+训练数据和对应的FAE已经上传至[ScienceDB](https://doi.org/10.57760/sciencedb.37386)。
+
+**English**
+Traning database and corresponding FAE are avaliable on [ScienceDB](https://doi.org/10.57760/sciencedb.37386).
