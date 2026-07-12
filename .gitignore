@@ -18,3 +18,4 @@ GA_Results/
 
 # Editor-local state.
 .vscode/
+tmp/
